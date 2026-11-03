@@ -1,0 +1,22 @@
+# Docker Compose 文件版本，3.8 支持常用编排特性
+version: '3.8'
+
+# 服务定义
+services:
+  # Verdaccio 私有 npm 仓库服务
+  verdaccio:
+    # 使用官方 Verdaccio 5 镜像
+    image: verdaccio/verdaccio:5
+    # 容器名称，便于 docker ps 等命令识别
+    container_name: verdaccio
+    # 端口映射：宿主机 4873 -> 容器 4873（Verdaccio 默认端口）
+    ports:
+      - "4873:4873"
+    # 数据卷挂载，保证配置与包数据持久化、便于修改
+    volumes:
+      # 包存储目录：宿主机 ./storage 映射到容器内存储路径
+      - ./storage:/verdaccio/storage
+      # 配置目录：宿主机 ./conf 映射到容器内配置路径（含 config.yaml、htpasswd 等）
+      - ./conf:/verdaccio/conf
+    # 容器异常退出时自动重启
+    restart: always

@@ -1,0 +1,41 @@
+# Verdaccio 配置文件
+# 文档参考：https://verdaccio.org/docs/configuration
+
+# 包存储路径（容器内路径，需与 docker-compose 中 volume 一致）
+storage: /verdaccio/storage
+
+# 认证配置
+auth:
+  # 使用 htpasswd 文件认证（需先执行 htpasswd 生成 /verdaccio/conf/htpasswd）
+  htpasswd:
+    file: /verdaccio/conf/htpasswd
+
+# 上游镜像源：本地没有的包会从这里拉取
+uplinks:
+  npmjs:
+    url: https://registry.npmmirror.com/
+
+# 包访问与发布策略
+packages:
+  "@boomy/*":
+    access: $authenticated
+    publish: $authenticated
+  # 作用域包（如 @myorg/xxx）：所有人可读，仅认证用户可发布，未命中时走 npmjs 代理
+  "@*/*":
+    access: $all
+    publish: $authenticated
+    proxy: npmjs
+
+  # 非作用域包（**）：同上
+  "**":
+    access: $all
+    publish: $authenticated
+    proxy: npmjs
+
+# 服务监听地址与端口（0.0.0.0 表示接受所有网卡访问）
+server:
+  listen: 0.0.0.0:4873
+
+# 日志：输出到标准输出，便于 docker logs 查看；level: http 记录 HTTP 请求
+logs:
+  - { type: stdout, format: pretty, level: http }
